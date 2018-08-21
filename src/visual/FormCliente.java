@@ -7,6 +7,7 @@ package visual;
 
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import javax.swing.text.MaskFormatter;
 import model.Cliente;
 import model.DAOCliente;
 import model.DAOPais;
@@ -17,50 +18,58 @@ import model.Pais;
  * @author Matsudo
  */
 public class FormCliente extends javax.swing.JDialog {
+
     DAOCliente dao = new DAOCliente();
     DAOPais daoPais = new DAOPais();
-    
-    public void atualizaTabela(){
+
+    public void atualizaTabela() {
         listObjetos.clear();
         listObjetos.addAll(dao.getLista());
         int linha = listObjetos.size() - 1;
-        if (linha >= 0){
+        if (linha >= 0) {
             tblObjetos.setRowSelectionInterval(linha, linha);
             tblObjetos.scrollRectToVisible(
-            tblObjetos.getCellRect(linha, linha, true));
+                    tblObjetos.getCellRect(linha, linha, true));
         }
     }
-    
-    private void trataEdicao(boolean editando){
-       btnCancelar.setEnabled(editando);
-       btnSalvar.setEnabled(editando);
-       btnEditar.setEnabled(!editando);
-       btnExcluir.setEnabled(!editando);
-       btnNovo.setEnabled(!editando);
-       btnFechar.setEnabled(!editando);
-       btnPrimeiro.setEnabled(!editando);
-       btnProximo.setEnabled(!editando);
-       btnAnterior.setEnabled(!editando);
-       btnUltimo.setEnabled(!editando);
-       txtNome.setEditable(editando);
-       cbxPais.setEnabled(editando);
-       tblObjetos.setEnabled(!editando);
+
+    private void trataEdicao(boolean editando) {
+        btnCancelar.setEnabled(editando);
+        btnSalvar.setEnabled(editando);
+        btnEditar.setEnabled(!editando);
+        btnExcluir.setEnabled(!editando);
+        btnNovo.setEnabled(!editando);
+        btnFechar.setEnabled(!editando);
+        btnPrimeiro.setEnabled(!editando);
+        btnProximo.setEnabled(!editando);
+        btnAnterior.setEnabled(!editando);
+        btnUltimo.setEnabled(!editando);
+        txtNome.setEditable(editando);
+        cbxPais.setEnabled(editando);
+        txtNascimento.setEnabled(editando);
+        txtTelefone.setEnabled(editando);
+        tblObjetos.setEnabled(!editando);
     }
-    
-    public boolean validaCampos(){
-        if(!(txtNome.getText().length() > 0)){
+
+    public boolean validaCampos() {
+        if (!(txtNome.getText().length() > 0)) {
             JOptionPane.showMessageDialog(null, "Informe o nome da cidade");
             return false;
         }
-        if(!(cbxPais.getSelectedIndex() >= 0)){
+        if (!(cbxPais.getSelectedIndex() >= 0)) {
             JOptionPane.showMessageDialog(null, "Informe a SIGLA");
             cbxPais.requestFocus();
             return false;
         }
-        
+        if (!(txtNascimento.getText().length() >= 0)) {
+            JOptionPane.showMessageDialog(null, "Informe a data de nascimento");
+            txtNascimento.requestFocus();
+            return false;
+        }
+
         return true;
     }
-    
+
     /**
      * Creates new form FormPais
      */
@@ -110,7 +119,15 @@ public class FormCliente extends javax.swing.JDialog {
         txtNome = new javax.swing.JTextField();
         cbxPais = new javax.swing.JComboBox<>();
         lblCodigo = new javax.swing.JLabel();
-        txtNascimento = new javax.swing.JFormattedTextField();
+        javax.swing.text.MaskFormatter maskData = null;
+        try {
+            maskData = new MaskFormatter("##/##/####");
+            maskData.setPlaceholder("_");
+        } catch(Exception e){
+
+        }
+
+        txtNascimento = new javax.swing.JFormattedTextField(maskData);
         jLabel3 = new javax.swing.JLabel();
         txtTelefone = new javax.swing.JTextField();
         txtCodigo = new javax.swing.JTextField();
@@ -264,6 +281,16 @@ public class FormCliente extends javax.swing.JDialog {
 
         lblCodigo.setText("Nascimento");
 
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tblObjetos, org.jdesktop.beansbinding.ELProperty.create("${selectedElement.nascimento}"), txtNascimento, org.jdesktop.beansbinding.BeanProperty.create("value"));
+        binding.setConverter(converterData);
+        bindingGroup.addBinding(binding);
+
+        txtNascimento.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNascimentoActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Telefone");
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tblObjetos, org.jdesktop.beansbinding.ELProperty.create("${selectedElement.codigo}"), txtCodigo, org.jdesktop.beansbinding.BeanProperty.create("text"));
@@ -338,7 +365,7 @@ public class FormCliente extends javax.swing.JDialog {
 
     private void btnAnteriorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnteriorActionPerformed
         int linha = tblObjetos.getSelectedRow();
-        if((linha - 1) >= 0){
+        if ((linha - 1) >= 0) {
             linha--;
         }
         tblObjetos.setRowSelectionInterval(linha, linha);
@@ -362,7 +389,7 @@ public class FormCliente extends javax.swing.JDialog {
     }//GEN-LAST:event_btnNovoActionPerformed
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
-        if(validaCampos()){
+        if (validaCampos()) {
             int linhaSelecionada = tblObjetos.getSelectedRow();
             Cliente obj = listObjetos.get(linhaSelecionada);
             dao.salvar(obj);
@@ -386,10 +413,10 @@ public class FormCliente extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
-        int opcao = 
-                    JOptionPane.showOptionDialog(null, "confirma exclusao?", "Pergunta", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Sim","Não"}, "Sim");
-        if(opcao == 0){
-        
+        int opcao
+                = JOptionPane.showOptionDialog(null, "confirma exclusao?", "Pergunta", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Sim", "Não"}, "Sim");
+        if (opcao == 0) {
+
             int linhaSelecionada = tblObjetos.getSelectedRow();
             Cliente obj = listObjetos.get(linhaSelecionada);
             dao.remover(obj);
@@ -404,7 +431,7 @@ public class FormCliente extends javax.swing.JDialog {
 
     private void btnProximoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProximoActionPerformed
         int linha = tblObjetos.getSelectedRow();
-        if((linha + 1) <= (tblObjetos.getRowCount() -1)){
+        if ((linha + 1) <= (tblObjetos.getRowCount() - 1)) {
             linha++;
         }
         tblObjetos.setRowSelectionInterval(linha, linha);
@@ -412,7 +439,7 @@ public class FormCliente extends javax.swing.JDialog {
     }//GEN-LAST:event_btnProximoActionPerformed
 
     private void btnUltimoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUltimoActionPerformed
-        int linha = tblObjetos.getRowCount() -1;
+        int linha = tblObjetos.getRowCount() - 1;
         tblObjetos.setRowSelectionInterval(linha, linha);
         tblObjetos.scrollRectToVisible(tblObjetos.getCellRect(linha, 0, true));;
     }//GEN-LAST:event_btnUltimoActionPerformed
@@ -420,6 +447,10 @@ public class FormCliente extends javax.swing.JDialog {
     private void txtCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodigoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCodigoActionPerformed
+
+    private void txtNascimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNascimentoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNascimentoActionPerformed
 
     /**
      * @param args the command line arguments

@@ -93,7 +93,12 @@ public class FormPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void menuClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuClienteActionPerformed
-        // TODO add your handling code here:
+        FormCliente form = new FormCliente(this, true);
+        form.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        form.setTitle("Manutenção de clientes");
+        form.setLocationRelativeTo(null);
+        form.setResizable(false);
+        form.setVisible(true);
     }//GEN-LAST:event_menuClienteActionPerformed
 
     private void menuAjudaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAjudaActionPerformed

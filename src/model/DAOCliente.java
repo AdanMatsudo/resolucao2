@@ -18,9 +18,9 @@ public class DAOCliente {
     }
     
     public boolean salvar(Cliente obj){
-        if(obj.getNome() == null){
-            String nome = Integer.toString(Dados.listaCliente.size() + 1);
-            obj.setNome(nome);
+        if(obj.getCodigo() == null){
+            Integer codigo = Dados.listaCliente.size() +1;
+            obj.setCodigo(codigo);
             Dados.listaCliente.add(obj);
         }
         return true;
