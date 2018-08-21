@@ -13,6 +13,8 @@ import java.util.Objects;
  * @author Matsudo
  */
 public class Cliente implements Serializable {
+    
+    //teste github.
     Integer codigo;
     String nome;
     String telefone;
