@@ -7,6 +7,8 @@ package visual;
 
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import model.Cliente;
+import model.DAOCliente;
 import model.DAOPais;
 import model.Pais;
 
@@ -14,8 +16,9 @@ import model.Pais;
  *
  * @author Matsudo
  */
-public class FormPais extends javax.swing.JDialog {
-    DAOPais dao = new DAOPais();
+public class FormCliente extends javax.swing.JDialog {
+    DAOCliente dao = new DAOCliente();
+    DAOPais daoPais = new DAOPais();
     
     public void atualizaTabela(){
         listObjetos.clear();
@@ -40,7 +43,7 @@ public class FormPais extends javax.swing.JDialog {
        btnAnterior.setEnabled(!editando);
        btnUltimo.setEnabled(!editando);
        txtNome.setEditable(editando);
-       cbxSigla.setEnabled(editando);
+       cbxPais.setEnabled(editando);
        tblObjetos.setEnabled(!editando);
     }
     
@@ -49,9 +52,9 @@ public class FormPais extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Informe o nome da cidade");
             return false;
         }
-        if(!(cbxSigla.getSelectedIndex() >= 0)){
+        if(!(cbxPais.getSelectedIndex() >= 0)){
             JOptionPane.showMessageDialog(null, "Informe a SIGLA");
-            cbxSigla.requestFocus();
+            cbxPais.requestFocus();
             return false;
         }
         
@@ -61,10 +64,12 @@ public class FormPais extends javax.swing.JDialog {
     /**
      * Creates new form FormPais
      */
-    public FormPais(java.awt.Frame parent, boolean modal) {
+    public FormCliente(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         atualizaTabela();
+        listPais.clear();
+        listPais.addAll(daoPais.getLista());
         trataEdicao(false);
     }
 
@@ -78,8 +83,11 @@ public class FormPais extends javax.swing.JDialog {
     private void initComponents() {
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        listObjetos = org.jdesktop.observablecollections.ObservableCollections.observableList(new ArrayList<Pais>())
+        listObjetos = org.jdesktop.observablecollections.ObservableCollections.observableList(new ArrayList<Cliente>())
         ;
+        listPais = org.jdesktop.observablecollections.ObservableCollections.observableList(new ArrayList<Pais>())
+        ;
+        converterData = new model.ConverterData();
         painelNavegacao = new javax.swing.JPanel();
         btnPrimeiro = new javax.swing.JButton();
         btnAnterior = new javax.swing.JButton();
@@ -100,15 +108,19 @@ public class FormPais extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtNome = new javax.swing.JTextField();
-        cbxSigla = new javax.swing.JComboBox<>();
+        cbxPais = new javax.swing.JComboBox<>();
         lblCodigo = new javax.swing.JLabel();
+        txtNascimento = new javax.swing.JFormattedTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtTelefone = new javax.swing.JTextField();
         txtCodigo = new javax.swing.JTextField();
+        lblCodigo1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Cadastro de Cidades");
 
         painelNavegacao.setBorder(javax.swing.BorderFactory.createTitledBorder("Navegação"));
-        painelNavegacao.setLayout(new java.awt.GridLayout());
+        painelNavegacao.setLayout(new java.awt.GridLayout(1, 0));
 
         btnPrimeiro.setText("Primeiro");
         btnPrimeiro.addActionListener(new java.awt.event.ActionListener() {
@@ -159,8 +171,20 @@ public class FormPais extends javax.swing.JDialog {
         columnBinding.setColumnName("Nome");
         columnBinding.setColumnClass(String.class);
         columnBinding.setEditable(false);
-        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${sigla}"));
-        columnBinding.setColumnName("Sigla");
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${codigo}"));
+        columnBinding.setColumnName("Codigo");
+        columnBinding.setColumnClass(Integer.class);
+        columnBinding.setEditable(false);
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${credito}"));
+        columnBinding.setColumnName("Credito");
+        columnBinding.setColumnClass(Double.class);
+        columnBinding.setEditable(false);
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${pais}"));
+        columnBinding.setColumnName("Pais");
+        columnBinding.setColumnClass(model.Pais.class);
+        columnBinding.setEditable(false);
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${telefone}"));
+        columnBinding.setColumnName("Telefone");
         columnBinding.setColumnClass(String.class);
         columnBinding.setEditable(false);
         bindingGroup.addBinding(jTableBinding);
@@ -172,7 +196,7 @@ public class FormPais extends javax.swing.JDialog {
         abas.addTab("Listagem", abasListagem);
 
         painelAcoes.setBorder(javax.swing.BorderFactory.createTitledBorder("Ações"));
-        painelAcoes.setLayout(new java.awt.GridLayout());
+        painelAcoes.setLayout(new java.awt.GridLayout(1, 0));
 
         btnNovo.setText("Novo");
         btnNovo.addActionListener(new java.awt.event.ActionListener() {
@@ -216,7 +240,7 @@ public class FormPais extends javax.swing.JDialog {
 
         jLabel1.setText("Nome");
 
-        jLabel2.setText("Sigla");
+        jLabel2.setText("Pais");
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tblObjetos, org.jdesktop.beansbinding.ELProperty.create("${selectedElement.nome}"), txtNome, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
@@ -227,18 +251,20 @@ public class FormPais extends javax.swing.JDialog {
             }
         });
 
-        cbxSigla.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "BRA", "EUA", "JPN" }));
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tblObjetos, org.jdesktop.beansbinding.ELProperty.create("${selectedElement.sigla}"), cbxSigla, org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
+        org.jdesktop.swingbinding.JComboBoxBinding jComboBoxBinding = org.jdesktop.swingbinding.SwingBindings.createJComboBoxBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, listPais, cbxPais);
+        bindingGroup.addBinding(jComboBoxBinding);
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tblObjetos, org.jdesktop.beansbinding.ELProperty.create("${selectedElement.pais}"), cbxPais, org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
         bindingGroup.addBinding(binding);
 
-        cbxSigla.addActionListener(new java.awt.event.ActionListener() {
+        cbxPais.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbxSiglaActionPerformed(evt);
+                cbxPaisActionPerformed(evt);
             }
         });
 
-        lblCodigo.setText("Codigo");
+        lblCodigo.setText("Nascimento");
+
+        jLabel3.setText("Telefone");
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tblObjetos, org.jdesktop.beansbinding.ELProperty.create("${selectedElement.codigo}"), txtCodigo, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
@@ -248,6 +274,8 @@ public class FormPais extends javax.swing.JDialog {
                 txtCodigoActionPerformed(evt);
             }
         });
+
+        lblCodigo1.setText("Codigo");
 
         javax.swing.GroupLayout abasDadosLayout = new javax.swing.GroupLayout(abasDados);
         abasDados.setLayout(abasDadosLayout);
@@ -259,31 +287,44 @@ public class FormPais extends javax.swing.JDialog {
                 .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblCodigo)
                     .addComponent(jLabel1)
-                    .addComponent(jLabel2))
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addComponent(lblCodigo1))
                 .addGap(18, 18, 18)
                 .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtNome, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cbxSigla, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbxPais, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(txtTelefone, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
+                        .addComponent(txtNascimento, javax.swing.GroupLayout.Alignment.LEADING)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         abasDadosLayout.setVerticalGroup(
             abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(abasDadosLayout.createSequentialGroup()
                 .addComponent(painelAcoes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(12, 12, 12)
                 .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblCodigo)
-                    .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(7, 7, 7)
+                    .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCodigo1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(cbxSigla, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 233, Short.MAX_VALUE))
+                    .addComponent(cbxPais, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblCodigo)
+                    .addComponent(txtNascimento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(abasDadosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtTelefone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 176, Short.MAX_VALUE))
         );
 
         abas.addTab("Dados", abasDados);
@@ -313,7 +354,7 @@ public class FormPais extends javax.swing.JDialog {
     }//GEN-LAST:event_txtNomeActionPerformed
 
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
-        listObjetos.add((Pais) new Pais());
+        listObjetos.add((Cliente) new Cliente());
         int linha = listObjetos.size() - 1;
         tblObjetos.setRowSelectionInterval(linha, linha);
         trataEdicao(true);
@@ -322,21 +363,17 @@ public class FormPais extends javax.swing.JDialog {
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
         if(validaCampos()){
-        int linhaSelecionada = tblObjetos.getSelectedRow();
-        Pais obj = listObjetos.get(linhaSelecionada);
-        dao.salvar(obj);
-        trataEdicao(false);
-        atualizaTabela();
+            int linhaSelecionada = tblObjetos.getSelectedRow();
+            Cliente obj = listObjetos.get(linhaSelecionada);
+            dao.salvar(obj);
+            trataEdicao(false);
+            atualizaTabela();
         }
     }//GEN-LAST:event_btnSalvarActionPerformed
 
-    private void txtCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodigoActionPerformed
+    private void cbxPaisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxPaisActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtCodigoActionPerformed
-
-    private void cbxSiglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxSiglaActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbxSiglaActionPerformed
+    }//GEN-LAST:event_cbxPaisActionPerformed
 
     private void btnEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarActionPerformed
         trataEdicao(true);
@@ -354,7 +391,7 @@ public class FormPais extends javax.swing.JDialog {
         if(opcao == 0){
         
             int linhaSelecionada = tblObjetos.getSelectedRow();
-            Pais obj = listObjetos.get(linhaSelecionada);
+            Cliente obj = listObjetos.get(linhaSelecionada);
             dao.remover(obj);
             atualizaTabela();
         }
@@ -380,6 +417,10 @@ public class FormPais extends javax.swing.JDialog {
         tblObjetos.scrollRectToVisible(tblObjetos.getCellRect(linha, 0, true));;
     }//GEN-LAST:event_btnUltimoActionPerformed
 
+    private void txtCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodigoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCodigoActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -397,20 +438,21 @@ public class FormPais extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormPais.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormPais.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormPais.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormPais.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormCliente.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FormPais dialog = new FormPais(new javax.swing.JFrame(), true);
+                FormCliente dialog = new FormCliente(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -436,17 +478,23 @@ public class FormPais extends javax.swing.JDialog {
     private javax.swing.JButton btnProximo;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JButton btnUltimo;
-    private javax.swing.JComboBox<String> cbxSigla;
+    private javax.swing.JComboBox<String> cbxPais;
+    private model.ConverterData converterData;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCodigo;
-    private java.util.List<Pais> listObjetos;
+    private javax.swing.JLabel lblCodigo1;
+    private java.util.List<Cliente> listObjetos;
+    private java.util.List<Pais> listPais;
     private javax.swing.JPanel painelAcoes;
     private javax.swing.JPanel painelNavegacao;
     private javax.swing.JTable tblObjetos;
     private javax.swing.JTextField txtCodigo;
+    private javax.swing.JFormattedTextField txtNascimento;
     private javax.swing.JTextField txtNome;
+    private javax.swing.JTextField txtTelefone;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 }

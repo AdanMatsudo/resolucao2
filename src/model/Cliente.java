@@ -6,6 +6,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -20,6 +21,7 @@ public class Cliente implements Serializable {
     String telefone;
     Double credito;
     Pais pais;
+    Calendar nascimento;
 
     public Cliente() {
     }
@@ -63,6 +65,15 @@ public class Cliente implements Serializable {
     public void setPais(Pais pais) {
         this.pais = pais;
     }
+
+    public Calendar getNascimento() {
+        return nascimento;
+    }
+
+    public void setNascimento(Calendar nascimento) {
+        this.nascimento = nascimento;
+    }
+    
 
     @Override
     public int hashCode() {

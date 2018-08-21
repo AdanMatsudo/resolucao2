@@ -19,7 +19,7 @@ public class DAOCliente {
     
     public boolean salvar(Cliente obj){
         if(obj.getNome() == null){
-            String nome = Integer.toString(Dados.listaPais.size() + 1);
+            String nome = Integer.toString(Dados.listaCliente.size() + 1);
             obj.setNome(nome);
             Dados.listaCliente.add(obj);
         }
